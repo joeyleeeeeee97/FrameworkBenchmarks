@@ -1,6 +1,8 @@
 package hello;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
@@ -14,7 +16,9 @@ import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.kqueue.KQueue;
 import io.netty.channel.kqueue.KQueueServerSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.oio.OioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.channel.socket.oio.OioServerSocketChannel;
 import io.netty.incubator.channel.uring.IOUring;
 import io.netty.incubator.channel.uring.IOUringChannelOption;
 import io.netty.incubator.channel.uring.IOUringEventLoopGroup;
@@ -23,6 +27,9 @@ import io.netty.util.ResourceLeakDetector;
 import io.netty.util.ResourceLeakDetector.Level;
 
 public class HelloWebServer {
+
+	private static boolean virtual = Boolean.valueOf(System.getProperty("virtual", "false"));
+	private static boolean oio = Boolean.valueOf(System.getProperty("oio", "false"));
 
 	static {
 		ResourceLeakDetector.setLevel(Level.DISABLED);
@@ -35,16 +42,20 @@ public class HelloWebServer {
 	}
 
 	public void run() throws Exception {
+		ThreadFactory factory = virtual? Thread.ofVirtual().factory() : Thread.ofPlatform().factory();
+
 		// Configure the server.
-		if (IOUring.isAvailable()) {
-			doRun(new IOUringEventLoopGroup(), IOUringServerSocketChannel.class, IoMultiplexer.IO_URING);
+		if (oio) {
+			doRun(new OioEventLoopGroup(2000, factory), OioServerSocketChannel.class, IoMultiplexer.EPOLL);
+		} else if (IOUring.isAvailable()) {
+			doRun(new IOUringEventLoopGroup(factory), IOUringServerSocketChannel.class, IoMultiplexer.IO_URING);
 		} else
 			if (Epoll.isAvailable()) {
-			doRun(new EpollEventLoopGroup(), EpollServerSocketChannel.class, IoMultiplexer.EPOLL);
+			doRun(new EpollEventLoopGroup(factory), EpollServerSocketChannel.class, IoMultiplexer.EPOLL);
 		} else if (KQueue.isAvailable()) {
-			doRun(new EpollEventLoopGroup(), KQueueServerSocketChannel.class, IoMultiplexer.KQUEUE);
+			doRun(new EpollEventLoopGroup(factory), KQueueServerSocketChannel.class, IoMultiplexer.KQUEUE);
 		} else {
-			doRun(new NioEventLoopGroup(), NioServerSocketChannel.class, IoMultiplexer.JDK);
+			doRun(new NioEventLoopGroup(factory), NioServerSocketChannel.class, IoMultiplexer.JDK);
 		}
 	}
 
@@ -66,7 +77,12 @@ public class HelloWebServer {
 			
 			b.option(ChannelOption.SO_BACKLOG, 8192);
 			b.option(ChannelOption.SO_REUSEADDR, true);
-			b.group(loupGroup).channel(serverChannelClass).childHandler(new HelloServerInitializer(loupGroup.next()));
+			if (oio) {
+				ThreadFactory factory = virtual? Thread.ofVirtual().factory() : Thread.ofPlatform().factory();
+				b.group(loupGroup).channel(serverChannelClass).childHandler(new HelloServerInitializer(new ScheduledThreadPoolExecutor(100, factory)));
+			} else {
+				b.group(loupGroup).channel(serverChannelClass).childHandler(new HelloServerInitializer(loupGroup.next()));
+			}
 			b.childOption(ChannelOption.SO_REUSEADDR, true);
 
 			Channel ch = b.bind(inet).sync().channel();

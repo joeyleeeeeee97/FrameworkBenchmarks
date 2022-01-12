@@ -62,12 +62,19 @@
 	<build>
 		<plugins>
 			<plugin>
-				<inherited>true</inherited>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.8.0</version>
+				<version>3.1</version>
 				<configuration>
-					<debug>false</debug>
+					<source>18</source>
+					<target>18</target>
+					<compilerArgs>
+						<arg>--add-modules=java.base,java.compiler,java.instrument,jdk.jartool,jdk.attach</arg>
+						<arg>--add-exports=java.base/jdk.internal.misc=ALL-UNNAMED</arg>
+						<arg>--add-exports=jdk.jartool/sun.tools.jar=ALL-UNNAMED</arg>
+						<arg>--add-exports=java.base/jdk.internal.access=ALL-UNNAMED</arg>
+						<compilerArgs>--enable-preview</compilerArgs>
+					</compilerArgs>
 				</configuration>
 			</plugin>
 			<plugin>
