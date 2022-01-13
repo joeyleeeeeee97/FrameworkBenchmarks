@@ -29,7 +29,7 @@ import io.netty.util.ResourceLeakDetector.Level;
 public class HelloWebServer {
 
 	private static boolean virtual = Boolean.valueOf(System.getProperty("virtual", "false"));
-	private static boolean oio = Boolean.valueOf(System.getProperty("oio", "false"));
+	private static boolean oio = Boolean.valueOf(System.getProperty("oio", "true"));
 
 	static {
 		ResourceLeakDetector.setLevel(Level.DISABLED);
