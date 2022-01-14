@@ -1,5 +1,5 @@
 {
-  "framework": "jetty",
+  "framework": "loom-jetty",
   "tests": [{
     "default": {
       "json_url": "/json",
