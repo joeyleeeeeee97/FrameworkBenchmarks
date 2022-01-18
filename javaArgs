@@ -28,4 +28,4 @@ JVM_ARGS=$1
 DOCKERFILE=$2
 
 
-sed -i "s/^CMD [\"java\"/&,\"${JVM_ARGS}\"/" ${DOCKERFILE}
+sed -i "s/^CMD \[\"java\"/&, \"${JVM_ARGS}\"/" ${DOCKERFILE}
