@@ -1,4 +1,4 @@
-FROM maven:3.5.3-jdk-8 as maven
+FROM registry.cn-hangzhou.aliyuncs.com/dragonwell/dragonwell:3.8.4-jdk-loom as maven
 WORKDIR /jetty
 COPY pom.xml pom.xml
 COPY src src
@@ -11,4 +11,4 @@ COPY --from=maven /jetty/target/jetty-example-0.1-jar-with-dependencies.jar app.
 
 EXPOSE 8080
 
-CMD ["java", "--enable-preview",  "-XX:+UseNUMA", "-XX:+UseParallelGC", "-jar", "app.jar"]
+CMD ["java", "--enable-preview", "-jar", "app.jar"]

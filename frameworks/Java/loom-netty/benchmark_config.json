@@ -1,5 +1,5 @@
 {
-  "framework": "netty",
+  "framework": "loom-netty",
   "tests": [{
     "default": {
       "json_url": "/json",

@@ -1,4 +1,5 @@
-FROM maven:3.5.3-jdk-8 as maven
+
+FROM registry.cn-hangzhou.aliyuncs.com/dragonwell/dragonwell:3.8.4-jdk-loom as maven
 WORKDIR /netty
 COPY pom.xml pom.xml
 COPY src src
@@ -10,4 +11,4 @@ COPY --from=maven /netty/target/netty-example-0.1-jar-with-dependencies.jar app.
 
 EXPOSE 8080
 
-CMD ["java", "--enable-preview",  "-server", "-XX:+UseNUMA", "-XX:+UseParallelGC", "-XX:+AggressiveOpts", "-jar", "app.jar"]
+CMD ["java", "--enable-preview",  "-server", "-jar", "app.jar"]

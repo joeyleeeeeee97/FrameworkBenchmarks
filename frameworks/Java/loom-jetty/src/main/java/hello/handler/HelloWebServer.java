@@ -19,10 +19,13 @@ import org.eclipse.jetty.server.handler.AbstractHandlerContainer;
  */
 public final class HelloWebServer 
 {
+    private static final boolean virtual = Boolean.valueOf(System.getProperty("virtual", "true"));
+
     public static void main(String[] args) throws Exception
     {
         Server server = new Server(8080);
-        ServerConnector connector = new ServerConnector(server, Executors.newVirtualThreadPerTaskExecutor(), null, null, -1,-1, new HttpConnectionFactory());
+        ServerConnector connector = new ServerConnector(server,
+                virtual? Executors.newVirtualThreadPerTaskExecutor() : null, null, null, -1,-1, new HttpConnectionFactory());
         HttpConfiguration config = connector.getBean(HttpConnectionFactory.class).getHttpConfiguration();
         config.setSendDateHeader(true);
         config.setSendServerVersion(true);
