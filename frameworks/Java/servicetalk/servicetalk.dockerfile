@@ -1,4 +1,4 @@
-FROM maven:3.6.1-jdk-11-slim as build
+FROM maven:3.5.3-jdk-8 as build
 WORKDIR /servicetalk
 COPY pom.xml pom.xml
 COPY src src
