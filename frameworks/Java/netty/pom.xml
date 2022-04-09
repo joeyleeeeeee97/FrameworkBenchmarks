@@ -9,8 +9,8 @@
 	<version>0.1</version>
 
 	<properties>
-		<maven.compiler.source>11</maven.compiler.source>
-		<maven.compiler.target>11</maven.compiler.target>
+		<maven.compiler.source>19</maven.compiler.source>
+		<maven.compiler.target>19</maven.compiler.target>
 		<netty.version>4.1.71.Final</netty.version>
 	</properties>
 
@@ -68,6 +68,8 @@
 				<version>3.8.0</version>
 				<configuration>
 					<debug>false</debug>
+					<release>19</release>
+					<compilerArgs>--enable-preview</compilerArgs>
 				</configuration>
 			</plugin>
 			<plugin>
