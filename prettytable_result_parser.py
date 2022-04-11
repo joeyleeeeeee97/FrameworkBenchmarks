@@ -1,8 +1,7 @@
 # -*- coding: UTF-8 -*-
 import sys
-sys.path.insert(0, '/usr/lib/python2.7/site-packages')
 import json as js
-import os, getopt, argparse, requests
+import os, getopt, argparse
 from prettytable import PrettyTable
 import hashlib
 import time
@@ -29,26 +28,6 @@ def parse_argument():
         default=['latencyAvg'],
         nargs='+',
         help='interested datas'
-    )
-    parser.add_argument(
-        '--post',
-        default='http://localhost:7001',
-        help='where to post test results'
-    )
-    parser.add_argument(
-        '--output',
-        default=False,
-        help='whether result as table or not'
-    )
-    parser.add_argument(
-        '--env',
-        default='default',
-        help='test running envirment'
-    )
-    parser.add_argument(
-        '--version',
-        default='latest',
-        help='whether result as table or not'
     )
     args = parser.parse_args()
     return args
@@ -79,8 +58,6 @@ def update_result(test_name, file_name, workload, test_result):
         result_dict[test_name][workload][file_name] = test_result
 
 def print_table(args):
-    if (args.output==False):
-        return;
     for interested_data in args.datas:
         for k,workload_results in result_dict.items():
             print "BechMarking " + k  + "\n"
@@ -93,34 +70,6 @@ def print_table(args):
                     pt.add_row([map_workload_to_value(workload)[i]] + data_row)
                 print pt
 
-def post_result(args):
-    for k,workload_results in result_dict.items():
-        for workload in workload_results:
-            keyvalues = []
-            throught_list = [v.get('totalRequests') for v in  workload_results[workload]['latest.json']]
-            rt_list = [v.get('latencyAvg') for v in  workload_results[workload]['latest.json']]
-            for i in range(len(throught_list)):
-                kvpair = {}
-                kvpair['stressLevel'] = str(map_workload_to_value(workload)[i])
-                kvpair['keyName'] = 'througput'
-                kvpair['value'] = str(throught_list[i])
-                keyvalues.append(kvpair)
-            for i in range(len(rt_list)):
-                kvpair = {}
-                kvpair['stressLevel'] = str(map_workload_to_value(workload)[i])
-                kvpair['keyName'] = 'responseTime'
-                kvpair['value'] = toms(rt_list[i])
-                keyvalues.append(kvpair)
-            headers={'Content-type':'application/json', 'Accept':'application/json'}
-            post_json_key = ['testName', 'buildName', 'env', 'ciResults']
-            post_json_val = [k + "-" + workload , args.version, args.env, keyvalues]
-            post_json = dict(zip(post_json_key, post_json_val))
-            token='8aosidnalknzfaasflkasmsdlaklknf'
-            data=time.strftime("%y%m%d%H", time.localtime())+token
-            hash_md5 = hashlib.md5(data)
-            response = requests.post(args.post+'/openapi/testResult.json?token='+hash_md5.hexdigest(), json=post_json, headers=headers)
-            print response.text
-    
 def map_workload_to_field(workload):
     if (workload == 'query'):
         return 'queryIntervals'
@@ -152,4 +101,3 @@ if __name__ == "__main__":
     files = args.files
     interested_datas = args.datas
     read_files(args)
-    post_result(args)
