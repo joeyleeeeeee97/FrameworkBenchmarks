@@ -11,4 +11,4 @@ COPY --from=maven /netty/target/netty-example-0.1-jar-with-dependencies.jar app.
 
 EXPOSE 8080
 
-CMD ["java", "--enable-preview", "-DvirtualThread=true", "-server", "-jar", "app.jar"]
+CMD ["java", "--enable-preview", "-DvirtualThread=false", "-server", "-jar", "app.jar"]
