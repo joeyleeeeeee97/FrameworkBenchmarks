@@ -1,6 +1,7 @@
 package hello;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.ThreadFactory;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
@@ -42,30 +43,32 @@ public class HelloWebServer {
 
 	public void run() throws Exception {
 		// Configure the server.
+		ThreadFactory threadFactory = Thread.ofPlatform().factory();
 		if (virtualThread) {
+			threadFactory = Thread.ofVirtual().factory();
 			if (oio) {
-				OioEventLoopGroup oioVirtualEventLoopGroup = new OioEventLoopGroup(0, Thread.ofVirtual().factory());
+				OioEventLoopGroup oioVirtualEventLoopGroup = new OioEventLoopGroup(0, threadFactory);
 				doRun(oioVirtualEventLoopGroup, OioServerSocketChannel.class, IoMultiplexer.JDK);
 			} else {
-				EventLoopGroup virtualThreadGroup = new NioEventLoopGroup(Thread.ofVirtual().factory());
+				EventLoopGroup virtualThreadGroup = new NioEventLoopGroup(threadFactory);
 				doRun(virtualThreadGroup, NioServerSocketChannel.class, IoMultiplexer.JDK);
 			}
 		} else if (IOUring.isAvailable()) {
-			doRun(new IOUringEventLoopGroup(), IOUringServerSocketChannel.class, IoMultiplexer.IO_URING);
+			doRun(new IOUringEventLoopGroup(threadFactory), IOUringServerSocketChannel.class, IoMultiplexer.IO_URING);
 		} else
 			if (Epoll.isAvailable()) {
-			doRun(new EpollEventLoopGroup(), EpollServerSocketChannel.class, IoMultiplexer.EPOLL);
+			doRun(new EpollEventLoopGroup(threadFactory), EpollServerSocketChannel.class, IoMultiplexer.EPOLL);
 		} else if (KQueue.isAvailable()) {
-			doRun(new EpollEventLoopGroup(), KQueueServerSocketChannel.class, IoMultiplexer.KQUEUE);
+			doRun(new EpollEventLoopGroup(threadFactory), KQueueServerSocketChannel.class, IoMultiplexer.KQUEUE);
 		} else {
-			doRun(new NioEventLoopGroup(), NioServerSocketChannel.class, IoMultiplexer.JDK);
+			doRun(new NioEventLoopGroup(threadFactory), NioServerSocketChannel.class, IoMultiplexer.JDK);
 		}
 	}
 
 	private void doRun(EventLoopGroup loupGroup, Class<? extends ServerChannel> serverChannelClass, IoMultiplexer multiplexer) throws InterruptedException {
 		try {
 			InetSocketAddress inet = new InetSocketAddress(port);
-			
+
 			System.out.printf("Using %s IoMultiplexer%n", multiplexer);
 
 			ServerBootstrap b = new ServerBootstrap();
@@ -73,11 +76,11 @@ public class HelloWebServer {
 			if (multiplexer == IoMultiplexer.EPOLL) {
 				b.option(EpollChannelOption.SO_REUSEPORT, true);
 			}
-			
+
 			if (multiplexer == IoMultiplexer.IO_URING) {
 				b.option(IOUringChannelOption.SO_REUSEPORT, true);
 			}
-			
+
 			b.option(ChannelOption.SO_BACKLOG, 8192);
 			b.option(ChannelOption.SO_REUSEADDR, true);
 			b.group(loupGroup).channel(serverChannelClass).childHandler(new HelloServerInitializer(loupGroup.next()));
