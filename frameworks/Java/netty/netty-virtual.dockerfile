@@ -5,7 +5,7 @@ COPY src src
 RUN mvn compile assembly:single -q
 
 
-FROM dragonwell8/loom-19-ea
+FROM dragonwell8/loom-19-jl
 WORKDIR /netty
 COPY --from=maven /netty/target/netty-example-0.1-jar-with-dependencies.jar app.jar
 
