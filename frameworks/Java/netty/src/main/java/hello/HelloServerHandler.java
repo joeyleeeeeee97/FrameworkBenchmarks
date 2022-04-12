@@ -15,8 +15,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 import com.jsoniter.output.JsonStream;
 import com.jsoniter.output.JsonStreamPool;
@@ -34,6 +33,7 @@ import io.netty.util.AsciiString;
 import io.netty.util.CharsetUtil;
 import io.netty.util.ReferenceCountUtil;
 import io.netty.util.concurrent.FastThreadLocal;
+import javassist.bytecode.analysis.Executor;
 
 public class HelloServerHandler extends ChannelInboundHandlerAdapter {
 
@@ -72,6 +72,15 @@ public class HelloServerHandler extends ChannelInboundHandlerAdapter {
 	private static final int JSON_LEN = jsonLen();
 	private static final CharSequence JSON_CLHEADER_VALUE = AsciiString.cached(String.valueOf(JSON_LEN));
 	private static final CharSequence SERVER_NAME = AsciiString.cached("Netty");
+	private static final ExecutorService ASYNC_EXECUTOR;
+
+	static {
+		if (HelloWebServer.virtualThread) {
+			ASYNC_EXECUTOR = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), Thread.ofVirtual().factory());
+		} else {
+			ASYNC_EXECUTOR = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), Thread.ofPlatform().factory());
+		}
+	}
 
 	private volatile CharSequence date = new AsciiString(FORMAT.get().format(new Date()));
 
@@ -107,6 +116,12 @@ public class HelloServerHandler extends ChannelInboundHandlerAdapter {
 		case "/json":
 			byte[] json = serializeMsg(newMsg());
 			writeJsonResponse(ctx, Unpooled.wrappedBuffer(json));
+			return;
+		case "/json-async":
+			byte[] jsonAsync = ASYNC_EXECUTOR.submit(() -> serializeMsg(newMsg())).get();
+			writeJsonResponse(ctx, Unpooled.wrappedBuffer(jsonAsync));
+		case "/plaintext-async":
+			writePlainResponse(ctx, Unpooled.wrappedBuffer(ASYNC_EXECUTOR.submit(() -> STATIC_PLAINTEXT).get()));
 			return;
 		}
 		FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, NOT_FOUND, Unpooled.EMPTY_BUFFER, false);

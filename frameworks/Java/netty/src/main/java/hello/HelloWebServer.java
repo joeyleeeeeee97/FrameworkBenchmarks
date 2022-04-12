@@ -34,7 +34,7 @@ public class HelloWebServer {
 	}
 
 	private final int port;
-	private static final Boolean virtualThread;
+	static final Boolean virtualThread;
 	private static final Boolean oio;
 
 	public HelloWebServer(int port) {
