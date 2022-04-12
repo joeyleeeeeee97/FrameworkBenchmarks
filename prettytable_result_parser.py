@@ -62,6 +62,7 @@ def print_table(args):
         for k,workload_results in result_dict.items():
             for workload in workload_results:
                 pt = PrettyTable()
+                pt.title = "Test:" + k + ", Type: " + workload + ", Result: " + interested_data
                 pt.field_names = [map_workload_to_field(workload)] + list(workload_results[workload].keys())
                 for i in range(len(workload_results[workload][args.files[0]])):
                     data_row = [v[i].get(interested_data) for v in workload_results[workload].values()]
