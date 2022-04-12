@@ -60,15 +60,12 @@ def update_result(test_name, file_name, workload, test_result):
 def print_table(args):
     for interested_data in args.datas:
         for k,workload_results in result_dict.items():
-            print "BechMarking " + k  + "\n"
             for workload in workload_results:
-                print "Workload " + workload + "\n"
                 pt = PrettyTable()
                 pt.field_names = [map_workload_to_field(workload)] + workload_results[workload].keys()
                 for i in range(len(workload_results[workload][args.files[0]])):
                     data_row = [v[i].get(interested_data) for v in workload_results[workload].values()]
                     pt.add_row([map_workload_to_value(workload)[i]] + data_row)
-                print pt
 
 def map_workload_to_field(workload):
     if (workload == 'query'):
