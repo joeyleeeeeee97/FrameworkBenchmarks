@@ -50,7 +50,7 @@ public class HelloWebServer {
 				OioEventLoopGroup oioVirtualEventLoopGroup = new OioEventLoopGroup(0, threadFactory);
 				doRun(oioVirtualEventLoopGroup, OioServerSocketChannel.class, IoMultiplexer.JDK);
 			} else {
-				EventLoopGroup virtualThreadGroup = new NioEventLoopGroup(threadFactory);
+				EventLoopGroup virtualThreadGroup = new NioEventLoopGroup(Runtime.getRuntime().availableProcessors(), threadFactory);
 				doRun(virtualThreadGroup, NioServerSocketChannel.class, IoMultiplexer.JDK);
 			}
 		} else if (IOUring.isAvailable()) {
