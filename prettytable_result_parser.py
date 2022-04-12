@@ -50,11 +50,11 @@ def read_files(args):
                     update_result(test_name, f, workload, test_result);
 
 def update_result(test_name, file_name, workload, test_result):
-    if False == result_dict.has_key(test_name):
+    if test_name not in result_dict:
         result_dict[test_name] = {}
-    if False == result_dict[test_name].has_key(workload):
+    if workload not in result_dict[test_name]:
         result_dict[test_name][workload] = {}
-    if False == result_dict[test_name][workload].has_key(file_name):
+    if file_name not in result_dict[test_name][workload]:
         result_dict[test_name][workload][file_name] = test_result
 
 def print_table(args):
@@ -62,10 +62,11 @@ def print_table(args):
         for k,workload_results in result_dict.items():
             for workload in workload_results:
                 pt = PrettyTable()
-                pt.field_names = [map_workload_to_field(workload)] + workload_results[workload].keys()
+                pt.field_names = [map_workload_to_field(workload)] + list(workload_results[workload].keys())
                 for i in range(len(workload_results[workload][args.files[0]])):
                     data_row = [v[i].get(interested_data) for v in workload_results[workload].values()]
                     pt.add_row([map_workload_to_value(workload)[i]] + data_row)
+                print(pt)
 
 def map_workload_to_field(workload):
     if (workload == 'query'):
@@ -98,3 +99,4 @@ if __name__ == "__main__":
     files = args.files
     interested_datas = args.datas
     read_files(args)
+    print_table(args)
