@@ -57,7 +57,7 @@ public class HelloWebServer {
 			doRun(new IOUringEventLoopGroup(threadFactory), IOUringServerSocketChannel.class, IoMultiplexer.IO_URING);
 		} else
 			if (Epoll.isAvailable()) {
-			doRun(new EpollEventLoopGroup(threadFactory), EpollServerSocketChannel.class, IoMultiplexer.EPOLL);
+			doRun(new EpollEventLoopGroup(Runtime.getRuntime().availableProcessors(), threadFactory), EpollServerSocketChannel.class, IoMultiplexer.EPOLL);
 		} else if (KQueue.isAvailable()) {
 			doRun(new EpollEventLoopGroup(threadFactory), KQueueServerSocketChannel.class, IoMultiplexer.KQUEUE);
 		} else {
