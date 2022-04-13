@@ -120,6 +120,7 @@ public class HelloServerHandler extends ChannelInboundHandlerAdapter {
 		case "/json-async":
 			byte[] jsonAsync = ASYNC_EXECUTOR.submit(() -> serializeMsg(newMsg())).get();
 			writeJsonResponse(ctx, Unpooled.wrappedBuffer(jsonAsync));
+			return;
 		case "/plaintext-async":
 			writePlainResponse(ctx, Unpooled.wrappedBuffer(ASYNC_EXECUTOR.submit(() -> STATIC_PLAINTEXT).get()));
 			return;
