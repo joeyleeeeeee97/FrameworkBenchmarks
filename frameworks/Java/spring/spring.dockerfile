@@ -4,7 +4,7 @@ COPY src src
 COPY pom.xml pom.xml
 RUN mvn package -q
 
-FROM dragonwell8/loom-19-customized
+FROM dragonwell8/loom-19-jl
 WORKDIR /spring
 COPY --from=maven /spring/target/hello-spring-1.0-SNAPSHOT.jar app.jar
 
