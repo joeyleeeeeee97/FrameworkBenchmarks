@@ -83,7 +83,7 @@ public class HelloWebServer {
 
 			b.option(ChannelOption.SO_BACKLOG, 8192);
 			b.option(ChannelOption.SO_REUSEADDR, true);
-			b.group(loupGroup).channel(serverChannelClass).childHandler(new HelloServerInitializer(loupGroup.next()));
+			b.group(loupGroup).channel(serverChannelClass).childHandler(new HelloServerInitializer(oio? loupGroup : loupGroup.next()));
 			b.childOption(ChannelOption.SO_REUSEADDR, true);
 
 			Channel ch = b.bind(inet).sync().channel();
