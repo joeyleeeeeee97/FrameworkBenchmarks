@@ -1,5 +1,6 @@
 package hello;
 
+import static hello.HelloWebServer.oio;
 import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_LENGTH;
 import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
 import static io.netty.handler.codec.http.HttpHeaderNames.DATE;
@@ -85,14 +86,16 @@ public class HelloServerHandler extends ChannelInboundHandlerAdapter {
 	private volatile CharSequence date = new AsciiString(FORMAT.get().format(new Date()));
 
 	HelloServerHandler(ScheduledExecutorService service) {
-		service.scheduleWithFixedDelay(new Runnable() {
-			private final DateFormat format = FORMAT.get();
+		if (!oio) {
+			service.scheduleWithFixedDelay(new Runnable() {
+				private final DateFormat format = FORMAT.get();
 
-			@Override
-			public void run() {
-				date = new AsciiString(format.format(new Date()));
-			}
-		}, 1000, 1000, TimeUnit.MILLISECONDS);
+				@Override
+				public void run() {
+					date = new AsciiString(format.format(new Date()));
+				}
+			}, 1000, 1000, TimeUnit.MILLISECONDS);
+		}
 	}
 
 	@Override

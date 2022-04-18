@@ -35,7 +35,7 @@ public class HelloWebServer {
 
 	private final int port;
 	static final Boolean virtualThread;
-	private static final Boolean oio;
+	static final Boolean oio;
 
 	public HelloWebServer(int port) {
 		this.port = port;
