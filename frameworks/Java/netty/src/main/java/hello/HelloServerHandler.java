@@ -95,6 +95,15 @@ public class HelloServerHandler extends ChannelInboundHandlerAdapter {
 					date = new AsciiString(format.format(new Date()));
 				}
 			}, 1000, 1000, TimeUnit.MILLISECONDS);
+		} else {
+			Executors.newScheduledThreadPool(1).scheduleWithFixedDelay(new Runnable() {
+				private final DateFormat format = FORMAT.get();
+
+				@Override
+				public void run() {
+					date = new AsciiString(format.format(new Date()));
+				}
+			}, 1000, 1000, TimeUnit.MILLISECONDS);
 		}
 	}
 
