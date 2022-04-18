@@ -58,7 +58,7 @@
       "notes": "",
       "versus": "netty"
     },
-    "perferoio": {
+    "preferoio": {
       "json_url": "/json",
       "plaintext_url": "/plaintext",
       "port": 8080,
