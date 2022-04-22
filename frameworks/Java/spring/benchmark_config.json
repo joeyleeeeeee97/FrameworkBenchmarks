@@ -4,7 +4,6 @@
     "default": {
       "json_url": "/json",
       "plaintext_url": "/plaintext",
-      "update_url": "/updates?queries=",
       "port": 8080,
       "approach": "Realistic",
       "classification": "Fullstack",
@@ -65,7 +64,6 @@
     },
     "virtual": {
       "json_url": "/json",
-      "fortune_url": "/fortunes",
       "plaintext_url": "/plaintext",
       "port": 8080,
       "approach": "Realistic",
@@ -105,7 +103,6 @@
     "virtualbiz": {
       "json_url": "/json",
       "plaintext_url": "/plaintext",
-      "update_url": "/updates?queries=",
       "port": 8080,
       "approach": "Realistic",
       "classification": "Fullstack",
