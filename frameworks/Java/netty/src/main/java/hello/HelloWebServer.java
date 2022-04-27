@@ -24,8 +24,13 @@ import io.netty.util.ResourceLeakDetector.Level;
 
 public class HelloWebServer {
 
+	private static boolean iouring;
+
 	static {
 		ResourceLeakDetector.setLevel(Level.DISABLED);
+		if (Boolean.parseBoolean(System.getProperty("tryIOUring"))) {
+			iouring = true;
+		}
 	}
 
 	private final int port;
@@ -36,10 +41,11 @@ public class HelloWebServer {
 
 	public void run() throws Exception {
 		// Configure the server.
-		if (IOUring.isAvailable()) {
+		if (iouring && IOUring.isAvailable()) {
+			System.out.println("Using iouring");
 			doRun(new IOUringEventLoopGroup(), IOUringServerSocketChannel.class, IoMultiplexer.IO_URING);
-		} else
-			if (Epoll.isAvailable()) {
+		} else if (Epoll.isAvailable()) {
+			System.out.println("Using epoll");
 			doRun(new EpollEventLoopGroup(), EpollServerSocketChannel.class, IoMultiplexer.EPOLL);
 		} else if (KQueue.isAvailable()) {
 			doRun(new EpollEventLoopGroup(), KQueueServerSocketChannel.class, IoMultiplexer.KQUEUE);
@@ -51,7 +57,7 @@ public class HelloWebServer {
 	private void doRun(EventLoopGroup loupGroup, Class<? extends ServerChannel> serverChannelClass, IoMultiplexer multiplexer) throws InterruptedException {
 		try {
 			InetSocketAddress inet = new InetSocketAddress(port);
-			
+
 			System.out.printf("Using %s IoMultiplexer%n", multiplexer);
 
 			ServerBootstrap b = new ServerBootstrap();
@@ -59,11 +65,11 @@ public class HelloWebServer {
 			if (multiplexer == IoMultiplexer.EPOLL) {
 				b.option(EpollChannelOption.SO_REUSEPORT, true);
 			}
-			
+
 			if (multiplexer == IoMultiplexer.IO_URING) {
 				b.option(IOUringChannelOption.SO_REUSEPORT, true);
 			}
-			
+
 			b.option(ChannelOption.SO_BACKLOG, 8192);
 			b.option(ChannelOption.SO_REUSEADDR, true);
 			b.group(loupGroup).channel(serverChannelClass).childHandler(new HelloServerInitializer(loupGroup.next()));
