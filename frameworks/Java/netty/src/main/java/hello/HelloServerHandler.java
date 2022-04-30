@@ -75,11 +75,19 @@ public class HelloServerHandler extends ChannelInboundHandlerAdapter {
 	private static final CharSequence SERVER_NAME = AsciiString.cached("Netty");
 	private static final ExecutorService ASYNC_EXECUTOR;
 
+	private static ScheduledExecutorService TIMER;
+
 	static {
+		ThreadFactory factory;
 		if (HelloWebServer.virtualThread) {
-			ASYNC_EXECUTOR = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), Thread.ofVirtual().factory());
+			factory = Thread.ofVirtual().factory();
 		} else {
-			ASYNC_EXECUTOR = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), Thread.ofPlatform().factory());
+			factory = Thread.ofPlatform().factory();
+		}
+		ASYNC_EXECUTOR = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), factory);
+
+		if (oio) {
+			TIMER = Executors.newScheduledThreadPool(1, factory);
 		}
 	}
 
@@ -96,7 +104,7 @@ public class HelloServerHandler extends ChannelInboundHandlerAdapter {
 				}
 			}, 1000, 1000, TimeUnit.MILLISECONDS);
 		} else {
-			Executors.newScheduledThreadPool(1).scheduleWithFixedDelay(new Runnable() {
+			TIMER.scheduleWithFixedDelay(new Runnable() {
 				private final DateFormat format = FORMAT.get();
 
 				@Override
